@@ -27,7 +27,8 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', 'container-manager-api']
+ALLOWED_HOSTS = ['localhost', 'container-manager-api',
+                 'container-manager-api:8003']
 
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
