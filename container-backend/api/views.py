@@ -1,3 +1,4 @@
+from django.db.models.fields import IPAddressField
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import docker
@@ -6,13 +7,15 @@ import os
 import time
 import requests
 import json
+from .models import TaskContainer
+from .tasks import start_task
+from django.http import HttpResponse
 
 
 @api_view(['POST'])
 def launch_blender_container(request):
     scene = request.POST.get('scene_file')
     scene_name = request.POST.get('scene_name')
-    print(scene_name)
     compositing = request.POST.get('use_compositing')
     crops = request.POST.get('crops')
     samples = request.POST.get('samples')
@@ -29,19 +32,21 @@ def launch_blender_container(request):
         f.write(args)
     a = client.containers.run(
         f"phillipjensen/requestor:latest", network="golemgrid-backend_swarm-example", detach=True, environment=[f"TASKID={task_id}"])
-    time.sleep(30)
     a.reload()
     ip_add = a.attrs['NetworkSettings']['Networks']['golemgrid-backend_swarm-example']['IPAMConfig']['IPv4Address']
-    scene_upload_url = f"http://{ip_add}/files/"
-    params_upload_url = f"http://{ip_add}/params/"
-    files = {'scene_file': open(
-        settings.MEDIA_ROOT + scene, 'rb')}
-    params = {'params': open('data.json', 'rb')}
-    r = requests.post(scene_upload_url, files=files)
-    r_params = requests.post(params_upload_url, files=params)
-    print(args)
-    if r.status_code == 200:
-        cmd = "/bin/bash export YAGNA_APPKEY=$(yagna app-key list --json | jq -r .values[0][1]) && python3 /requestor/blender.py -j /requestor/data.json <&- &"
-        a.exec_run(cmd, detach=True)
-        a.reload()
-        print(a.logs())
+    TaskContainer.objects.create(
+        ip=ip_add, task_id=task_id, task_args=args, container_id=a.id, scene=scene)
+    return HttpResponse(status=200)
+
+
+def container_ready(request, task_id):
+    start_task.delay(task_id)
+    return HttpResponse(status=200)
+
+
+def task_finished_shutdown_container(request, task_id):
+    obj = TaskContainer.objects.get(task_id=task_id)
+    client = docker.from_env()
+    a = client.containers.get(obj.container_id)
+    a.stop()
+    return HttpResponse(status=200)

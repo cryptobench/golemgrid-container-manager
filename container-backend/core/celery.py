@@ -16,5 +16,5 @@ app = Celery('core')
 # def setup_periodic_tasks(sender, **kwargs):
 
 
-app.conf.broker_url = 'redis://redis:6379/0'
-app.conf.result_backend = 'redis://redis:6379/0'
+app.conf.broker_url = 'redis://redis:6379/1'
+app.conf.result_backend = 'redis://redis:6379/1'
