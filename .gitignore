@@ -6,3 +6,4 @@ celerybeat-schedule
 container-backend/static/admin/*
 container-backend/static/rest_framework/*
 celerybeat-schedule.db
+container-backend/data.json
