@@ -34,5 +34,7 @@ jobs:
             port: ${{ secrets.PORT }}
             script: |
                 docker service update --force --image phillipjensen/golemgrid-container-manager:${{ github.sha }} golemgrid-backend_container-manager-api
+                docker service update --force --image phillipjensen/golemgrid-container-manager-celery:${{ github.sha }} golemgrid-backend_celery_container_manager
+                docker service update --force --image phillipjensen/golemgrid-container-manager-celery-beat:${{ github.sha }} golemgrid-backend_celery_beat_container_manager
   
   
