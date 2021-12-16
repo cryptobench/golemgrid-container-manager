@@ -21,11 +21,11 @@ def start_task(task_id):
     files = {'scene_file': open(
         settings.MEDIA_ROOT + obj.scene, 'rb')}
     params = {'params': open('data.json', 'rb')}
-    process = subprocess.Popen(['sh', '/blender/blender', '-b', settings.MEDIA_ROOT +
-                               obj.scene, '-P', '/get_frames.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = process.communicate()
-    print(out)
-    result = re.search(r"\[([A-Za-z0-9_]+)\]", out)
+    process = subprocess.check_output(['sh', '/blender/blender', '-b', settings.MEDIA_ROOT +
+                                       obj.scene, '-P', '/get_frames.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    print(process.decode('UTF-8').rstrip())
+    result = re.search(r"\[([A-Za-z0-9_]+)\]",
+                       process.decode('UTF-8').rstrip())
     print(result.group(1))
     r = requests.post(scene_upload_url, files=files)
     r_params = requests.post(params_upload_url, files=params)
