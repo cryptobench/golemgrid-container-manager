@@ -50,6 +50,7 @@ RUN apk del build-deps && \
 
 COPY ./wait-for-it.sh /wait-for-it.sh
 COPY ./container-backend/ /container-backend/
+COPY ./get_frames.py /get_frames.py
 
 # CMD will run when this dockerfile is running
 CMD ["sh", "-c", "/wait-for-it.sh postgres-container-manager:5432 -- /container-backend/start.sh; celery -A core worker -l INFO"]

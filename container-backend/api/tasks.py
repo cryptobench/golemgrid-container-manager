@@ -5,6 +5,8 @@ from .models import TaskContainer
 import docker
 from django.conf import settings
 import requests
+import subprocess
+import re
 
 
 @app.task
@@ -19,6 +21,12 @@ def start_task(task_id):
     files = {'scene_file': open(
         settings.MEDIA_ROOT + obj.scene, 'rb')}
     params = {'params': open('data.json', 'rb')}
+    process = subprocess.Popen(['sh', '/blender/blender', '-b', settings.MEDIA_ROOT +
+                               obj.scene, '-P', '/get_frames.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = process.communicate()
+    print(out)
+    result = re.search(r"\[([A-Za-z0-9_]+)\]", out)
+    print(result.group(1))
     r = requests.post(scene_upload_url, files=files)
     r_params = requests.post(params_upload_url, files=params)
     if r.status_code == 200:
