@@ -38,6 +38,11 @@ COPY ./requirements.pip /scripts/
 RUN pip install --upgrade pip && pip install cryptography
 RUN pip install --no-cache-dir -r /scripts/requirements.pip
 
+
+
+RUN apk add curl
+RUN curl -s https://ftp.nluug.nl/pub/graphics/blender/release/Blender3.0/blender-3.0.0-linux-x64.tar.xz --output blender.tar.xz && tar -xf blender.tar.xz && mv blender-3.0.0-linux-x64 /blender
+ENV PATH=/blender:/usr/bin/:$PATH
 # removing temporary packages from docker and removing cache 
 RUN apk del build-deps && \
     find -type d -name __pycache__ -prune -exec rm -rf {} \; && \
