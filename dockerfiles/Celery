@@ -1,5 +1,5 @@
 # pull official python alpine image
-FROM python:3.9-alpine
+FROM python:3.9
 
 # Set Environment Variable
 ENV PYTHONUNBUFFERED 1
@@ -13,23 +13,7 @@ RUN mkdir /container-backend/static
 WORKDIR /container-backend
 
 # Adding mandatory packages to docker
-RUN apk update && apk add --no-cache \
-    postgresql \
-    zlib \
-    openssh-server \
-    jpeg 
-# Installing temporary packages required for installing requirements.pip 
-RUN apk add --no-cache --virtual build-deps \
-    gcc \  
-    python3-dev \ 
-    libffi-dev \ 
-    musl-dev \
-    postgresql-dev\
-    zlib-dev \
-    build-base \
-    cargo \
-    rust \
-    jpeg-dev 
+
 
 # Update pip
 
@@ -40,17 +24,24 @@ RUN pip install --no-cache-dir -r /scripts/requirements.pip
 
 
 
-RUN apk add curl
+RUN apt install curl
 RUN curl -s https://ftp.nluug.nl/pub/graphics/blender/release/Blender3.0/blender-3.0.0-linux-x64.tar.xz --output blender.tar.xz && tar -xf blender.tar.xz && mv blender-3.0.0-linux-x64 /blender
-ENV PATH=/blender:/usr/bin/:$PATH
 # removing temporary packages from docker and removing cache 
-RUN apk del build-deps && \
-    find -type d -name __pycache__ -prune -exec rm -rf {} \; && \
-    rm -rf ~/.cache/pip
+RUN apt-get update && \
+    apt-get install -y \
+    curl \
+    bzip2 \
+    libfreetype6 \
+    libgl1-mesa-dev \
+    libglu1-mesa \
+    libxi6 \
+    libxrender1 && \
+    apt-get -y autoremove && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY ./wait-for-it.sh /wait-for-it.sh
 COPY ./container-backend/ /container-backend/
 COPY ./get_frames.py /get_frames.py
-
+ENV PATH=/blender:/usr/bin/:$PATH
 # CMD will run when this dockerfile is running
 CMD ["sh", "-c", "/wait-for-it.sh postgres-container-manager:5432 -- /container-backend/start.sh; celery -A core worker -l INFO"]
