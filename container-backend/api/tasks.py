@@ -37,8 +37,8 @@ def start_task(task_id):
                               process.decode('UTF-8').rstrip())
         with open('data.json', 'r+') as f:
             data = json.load(f)
-            data['startframe'] = start_frame
-            data['endframe'] = end_frame
+            data['startframe'] = start_frame.group(1)
+            data['endframe'] = end_frame.group(1)
             f.seek(0)
             json.dump(data, f)
     params = {'params': open('data.json', 'rb')}
