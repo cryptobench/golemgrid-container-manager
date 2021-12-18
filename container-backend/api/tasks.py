@@ -32,7 +32,7 @@ def start_task(task_id):
                               process.decode('UTF-8').rstrip())
         data = {'startframe': int(start_frame.group(
             1)), 'endframe': int(end_frame.group(1)), "scene_file": obj.scene_file, 'scene_name': obj.scene_name}
-        with open('data.json', 'r+') as f:
+        with open('data.json', 'w') as f:
             json.dump(data, f)
     params = {'params': open('data.json', 'rb')}
     r = requests.post(scene_upload_url, files=files)
