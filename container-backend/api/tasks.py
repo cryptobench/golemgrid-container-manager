@@ -13,8 +13,6 @@ import os
 @app.task
 def start_task(task_id):
     obj = TaskContainer.objects.get(task_id=task_id)
-    with open('data.json', 'w') as f:
-        f.write(obj.task_args)
     client = docker.from_env()
     a = client.containers.get(obj.container_id)
     scene_upload_url = f"http://{obj.ip}/files/"
