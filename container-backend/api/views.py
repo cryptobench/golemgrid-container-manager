@@ -18,6 +18,10 @@ def launch_blender_container(request):
     scene_name = request.POST.get('scene_name')
     task_id = request.POST.get('task_id')
     client = docker.from_env()
+    args = {"scene_file": f"/requestor/scene/{scene_name}",
+            f"scene_name": scene_name}
+    with open('data.json', 'w') as f:
+        json.dump(args, f)
     a = client.containers.run(
         f"phillipjensen/requestor:latest", network="golemgrid-backend_swarm-example", detach=True, environment=[f"TASKID={task_id}"])
     a.reload()
