@@ -8,6 +8,7 @@ import requests
 import subprocess
 import re
 import os
+import shutil
 
 
 @app.task
@@ -42,3 +43,11 @@ def start_task(task_id):
         a.exec_run(cmd, detach=True)
         a.reload()
         print(a.logs())
+
+
+@app.task
+def zip_output_ended_task(task_id):
+    dir = settings.MEDIA_ROOT + task_id
+    shutil.make_archive(settings.MEDIA_ROOT + task_id, 'zip', dir)
+    shutil.move(settings.MEDIA_ROOT + task_id +
+                ".zip", dir + f"/{task_id}.zip")

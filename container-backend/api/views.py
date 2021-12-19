@@ -8,7 +8,7 @@ import time
 import requests
 import json
 from .models import TaskContainer
-from .tasks import start_task
+from .tasks import start_task, zip_output_ended_task
 from django.http import HttpResponse
 
 
@@ -37,4 +37,5 @@ def task_finished_shutdown_container(request, task_id):
     client = docker.from_env()
     a = client.containers.get(obj.container_id)
     a.stop()
+    zip_output_ended_task.delay(task_id)
     return HttpResponse(status=200)
