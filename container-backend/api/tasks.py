@@ -22,19 +22,21 @@ def start_task(task_id):
         settings.MEDIA_ROOT + obj.scene, 'rb')}
     if os.environ.get("ARM"):
         data = {'startframe': 1, 'endframe': 5,
-                "scene_file": obj.scene_file, 'scene_name': obj.scene_name, 'output_format': "PNG"}
+                "scene_file": obj.scene_file, 'scene_name': obj.scene_name, 'output_format': "PNG", 'output_extension': ".PNG"}
         with open('data.json', 'w') as f:
             json.dump(data, f)
     else:
         process = subprocess.check_output(
             ['blender', '-b', settings.MEDIA_ROOT + obj.scene, '-P', '/get_frames.py'])
         start_frame = re.search(r"\|(.*?)\|", process.decode('UTF-8').rstrip())
-        output_format = re.search(
+        output_extension = re.search(
             r"\%(.*?)\%", process.decode('UTF-8').rstrip())
+        output_format = re.search(
+            r"\#(.*?)\#", process.decode('UTF-8').rstrip())
         end_frame = re.search(r"\[([A-Za-z0-9_]+)\]",
                               process.decode('UTF-8').rstrip())
         data = {'startframe': int(start_frame.group(
-            1)), 'endframe': int(end_frame.group(1)), "scene_file": obj.scene_file, 'scene_name': obj.scene_name, 'output_format': str(output_format.group(1))}
+            1)), 'endframe': int(end_frame.group(1)), "scene_file": obj.scene_file, 'scene_name': obj.scene_name, 'output_format': str(output_extension.group(1)), 'output_extension': str(output_format.group(1))}
         with open('data.json', 'w') as f:
             json.dump(data, f)
     params = {'params': open('data.json', 'rb')}
