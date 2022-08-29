@@ -12,6 +12,13 @@ import shutil
 
 
 @app.task
+def get_task_args(task_id):
+    obj = TaskContainer.objects.get(task_id=task_id)
+    subprocess.check_output(
+        ['blender', '-b', settings.MEDIA_ROOT + obj.scene, '-P', '/get_frames.py', '--', task_id])
+
+
+@app.task
 def start_task(task_id):
     obj = TaskContainer.objects.get(task_id=task_id)
     client = docker.from_env()
@@ -21,6 +28,9 @@ def start_task(task_id):
     files = {'scene_file': open(
         settings.MEDIA_ROOT + obj.scene, 'rb')}
     if os.environ.get("ARM"):
+        process = subprocess.check_output(
+            ['blender', '-b', settings.MEDIA_ROOT + obj.scene, '-P', '/get_frames.py', '--', task_id])
+        print(process)
         data = {'startframe': 1, 'endframe': 5,
                 "scene_file": obj.scene_file, 'scene_name': obj.scene_name, 'output_format': "PNG", 'output_extension': ".PNG"}
         with open('data.json', 'w') as f:
@@ -28,6 +38,7 @@ def start_task(task_id):
     else:
         process = subprocess.check_output(
             ['blender', '-b', settings.MEDIA_ROOT + obj.scene, '-P', '/get_frames.py'])
+        print(process)
         start_frame = re.search(r"\|(.*?)\|", process.decode('UTF-8').rstrip())
         output_extension = re.search(
             r"\%(.*?)\%", process.decode('UTF-8').rstrip())
